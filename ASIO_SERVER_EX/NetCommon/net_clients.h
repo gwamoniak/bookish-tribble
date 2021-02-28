@@ -10,6 +10,7 @@ namespace net
 	template <typename T>
 	class client_interface
 	{
+	public:
 		client_interface() : m_socket(m_context)
 		{
 
@@ -39,7 +40,7 @@ namespace net
 				m_connection = std::make_unique<connection<T>>();
 
 				asio::ip::tcp::resolver resolver(m_context);
-				m_endpoints = resolver.resolve(host, std::to_string(port));
+				asio::ip::tcp::resolver::results_type m_endpoints = resolver.resolve(host, std::to_string(port));
 
 				//connect to server
 				m_connection->ConnectToServer(m_endpoints);

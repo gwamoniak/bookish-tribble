@@ -10,7 +10,7 @@ namespace net
 	struct message_header
 	{
 		T id{};
-		unit32_t size = 0;
+		uint32_t size = 0;
 	};
 
 	template <typename T>
@@ -63,7 +63,7 @@ namespace net
 			size_t i = msg.body.size() - sizeof(DataType);
 
 			// resize the by the size of the data being pushed
-			msg.body.resize(i):
+			msg.body.resize(i);
 
 			msg.header.size = msg.size();
 
