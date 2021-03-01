@@ -1,6 +1,6 @@
 #pragma once
 
-#include "net.h"
+#include "net_common.h"
 #include "net_tsqeued.h"
 #include "net_message.h"
 #include "net_connection.h"
@@ -45,7 +45,7 @@ namespace net
 		{
 			m_asioContext.stop();
 			//tidy up the context
-			if (m_threadContext.joinable)
+			if (m_threadContext.joinable())
 				m_threadContext.join();
 
 			std::cout << "[SERVER] Stoped! \n";
@@ -56,50 +56,57 @@ namespace net
 		{
 			// this it might not be safe ???
 			m_asioAcceptor.async_accept([this](std::error_code ec, asio::ip::tcp::socket socket)
+			{
+				if (!ec)
 				{
-					if (!ec)
+					std::cout << "[SERVER] connection... : " << socket.remote_endpoint() << "\n";
+					std::shared_ptr<connection<T>> conn =
+						std::make_shared<connection<T>>(connection<T>::owner::server,
+							m_asioContext, std::move(socket), m_qMessagesIn);
+
+					if (onClientConnect(conn))
 					{
-						std::cout << "[SERVER] connection... : " << socket.remote_endpoint() << "\n";
-						std::shared_ptr<connection<T>> conn =
-							std::make_shared<connection<T>>(connection<T>::owner::server,
-								m_asioContext, std::move(socket), m_qMessagesIn);
+						// add  new connection
+						m_deqConnections.push_back(std::move(conn));
+						m_deqConnections.back()->ConnectToClient(nIDCounter++);
 
-						if (onClientConnect(conn))
-						{
-							// add  new connection
-							m_deqConnections.push_back(std::move(conn));
-							m_deqConnections.back()->ConnectToClient(nIDCounter++);
-
-							std::count << "<-------> :ID=" << m_deqConnections.back()->GetID() << " Connection approved\n";
-						}
-						else
-						{
-							std::count << "<-------> Connection Denied \n";
-						}
+						std::cout << "<-------> :ID=" << m_deqConnections.back()->GetID() << " Connection approved\n";
 					}
 					else
 					{
-						std::cout << "[SERVER] connection error: " << ec.message() << "\n";
+						std::cout << "<-------> Connection Denied \n";
 					}
-					// if the context is busy just wait for another connection
-					WaitForClientConnection();
-				});
+				}
+				else
+				{
+					std::cout << "[SERVER] connection error: " << ec.message() << "\n";
+				}
+				// if the context is busy just wait for another connection
+				WaitForClientConnection(); 
+			});
+								
 		}
+
 		// msg for specific client
 		void MessageClient(std::shared_ptr<connection<T>> client, const message<T>& msg)
 		{
+			// Check client is legitimate...
 			if (client && client->IsConnected())
 			{
 				client->Send(msg);
 			}
 			else
 			{
-				onClientDisconnected(client);
+				// If we cant communicate with client then we may as 
+				// well remove the client - let the server know, it may
+				// be tracking it somehow
+				OnClientDisconnect(client);
+
 				client.reset();
+
+				// Then physically remove it from the container
 				m_deqConnections.erase(
-					std::remove(m_deqConnections.begin(), m_deqConnections.end(), client),
-					m_deqConnections.end()
-					);
+					std::remove(m_deqConnections.begin(), m_deqConnections.end(), client), m_deqConnections.end());
 			}
 		}
 
@@ -131,11 +138,12 @@ namespace net
 			}
 
 			if (bInvalidClientExist)
+			{
 				m_deqConnections.erase(
 					std::remove(m_deqConnections.begin(), m_deqConnections.end(), nullptr),
 					m_deqConnections.end()
 					);
-
+			}
 
 		}
 
@@ -162,7 +170,7 @@ namespace net
 
 		virtual bool onClientDisconnected(std::shared_ptr<connection<T>> client)
 		{
-			
+			return false;
 		}
 		virtual void OnMessage(std::shared_ptr<connection<T>> client, message<T>& msg)
 		{

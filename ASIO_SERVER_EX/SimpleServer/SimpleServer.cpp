@@ -44,7 +44,7 @@ protected:
 		{
 		case CustomMsgTypes::ServerPing:
 		{
-			//std::cout << "[" << client->GetID() << "]: Server Ping\n";
+			std::cout << "[" << client->GetID() << "]: Server Ping\n";
 
 			// Simply bounce message back to client
 			client->Send(msg);
@@ -58,8 +58,8 @@ protected:
 			// Construct a new message and send it to all clients
 			net::message<CustomMsgTypes> msg;
 			msg.header.id = CustomMsgTypes::ServerMessage;
-			//msg << client->GetID();
-			//MessageAllClients(msg, client);
+			msg << client->GetID();
+			MessageAllClients(msg, client);
 
 		}
 		break;
