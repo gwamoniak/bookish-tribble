@@ -3,17 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29920.165
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ASIO_SERVER_EX", "ASIO_TCP_SERVER.vcxproj", "{FA471A58-FC6A-4CA2-B7A3-6CF4431157A8}"
-	ProjectSection(ProjectDependencies) = postProject
-		{AE244835-6B4E-45D9-835B-B8DBDA6EB88B} = {AE244835-6B4E-45D9-835B-B8DBDA6EB88B}
-		{784A474A-7C69-4E21-9B9E-B7BB8C2EA1B1} = {784A474A-7C69-4E21-9B9E-B7BB8C2EA1B1}
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NetCommon", "NetCommon\NetCommon.vcxproj", "{784A474A-7C69-4E21-9B9E-B7BB8C2EA1B1}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NetClient", "NetClient\NetClient.vcxproj", "{AE244835-6B4E-45D9-835B-B8DBDA6EB88B}"
 	ProjectSection(ProjectDependencies) = postProject
 		{784A474A-7C69-4E21-9B9E-B7BB8C2EA1B1} = {784A474A-7C69-4E21-9B9E-B7BB8C2EA1B1}
+		{D80F2CE4-5030-4465-A89B-D2016B78D2AB} = {D80F2CE4-5030-4465-A89B-D2016B78D2AB}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimpleServer", "SimpleServer\SimpleServer.vcxproj", "{D80F2CE4-5030-4465-A89B-D2016B78D2AB}"
@@ -29,14 +24,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{FA471A58-FC6A-4CA2-B7A3-6CF4431157A8}.Debug|x64.ActiveCfg = Debug|x64
-		{FA471A58-FC6A-4CA2-B7A3-6CF4431157A8}.Debug|x64.Build.0 = Debug|x64
-		{FA471A58-FC6A-4CA2-B7A3-6CF4431157A8}.Debug|x86.ActiveCfg = Debug|Win32
-		{FA471A58-FC6A-4CA2-B7A3-6CF4431157A8}.Debug|x86.Build.0 = Debug|Win32
-		{FA471A58-FC6A-4CA2-B7A3-6CF4431157A8}.Release|x64.ActiveCfg = Release|x64
-		{FA471A58-FC6A-4CA2-B7A3-6CF4431157A8}.Release|x64.Build.0 = Release|x64
-		{FA471A58-FC6A-4CA2-B7A3-6CF4431157A8}.Release|x86.ActiveCfg = Release|Win32
-		{FA471A58-FC6A-4CA2-B7A3-6CF4431157A8}.Release|x86.Build.0 = Release|Win32
 		{784A474A-7C69-4E21-9B9E-B7BB8C2EA1B1}.Debug|x64.ActiveCfg = Debug|x64
 		{784A474A-7C69-4E21-9B9E-B7BB8C2EA1B1}.Debug|x64.Build.0 = Debug|x64
 		{784A474A-7C69-4E21-9B9E-B7BB8C2EA1B1}.Debug|x86.ActiveCfg = Debug|Win32

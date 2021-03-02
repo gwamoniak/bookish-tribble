@@ -164,11 +164,11 @@ namespace net
 		//clients connects
 		virtual bool onClientConnect(std::shared_ptr<connection<T>> client)
 		{
-			return false;
+			return true;
 		}
 		// clients disconnected
 
-		virtual bool onClientDisconnected(std::shared_ptr<connection<T>> client)
+		virtual void onClientDisconnected(std::shared_ptr<connection<T>> client)
 		{
 			return false;
 		}

@@ -34,7 +34,7 @@ protected:
 	// Called when a client appears to have disconnected
 	virtual void OnClientDisconnect(std::shared_ptr<net::connection<CustomMsgTypes>> client)
 	{
-		//std::cout << "Removing client [" << client->GetID() << "]\n";
+		std::cout << "Removing client [" << client->GetID() << "]\n";
 	}
 
 	// Called when a message arrives
@@ -53,7 +53,7 @@ protected:
 
 		case CustomMsgTypes::MessageAll:
 		{
-			//std::cout << "[" << client->GetID() << "]: Message All\n";
+			std::cout << "[" << client->GetID() << "]: Message All\n";
 
 			// Construct a new message and send it to all clients
 			net::message<CustomMsgTypes> msg;

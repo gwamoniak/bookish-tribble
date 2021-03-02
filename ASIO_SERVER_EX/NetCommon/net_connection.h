@@ -28,8 +28,8 @@ namespace net
 		{
 			return id;
 		}
-
-		bool ConnectToServer(const asio::ip::tcp::resolver::results_type& endpoints) 
+		// only for servers
+		void ConnectToServer(const asio::ip::tcp::resolver::results_type& endpoints) 
 		{
 			if (m_nOwnerType == owner::client)
 			{
@@ -43,7 +43,7 @@ namespace net
 						}
 					});
 			}
-		} // only by servers
+		} 
 
 		void ConnectToClient(uint32_t uid = 0)
 		{
@@ -57,11 +57,13 @@ namespace net
 			}
 		}
 		
-		bool Disconnect()
+		void Disconnect()
 		{
 			if (IsConnected())
 				asio::post(m_asioContext, [this]() { m_socket.close(); });
-		} // servers and clients
+		} 
+		
+		// servers and clients
 		bool IsConnected() const
 		{
 			return m_socket.is_open();

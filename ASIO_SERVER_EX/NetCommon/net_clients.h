@@ -1,8 +1,9 @@
 #pragma once
 #include "net_common.h"
-#include "net_message.h"
 #include "net_tsqeued.h"
+#include "net_message.h"
 #include "net_connection.h"
+
 
 
 namespace net 
@@ -31,16 +32,21 @@ namespace net
 
 			if (threadContext.joinable())
 				threadContext.join();
+
+			m_connection.release();
 		}
 
 		bool Connect(const std::string& host, const uint16_t port)
 		{
 			try
 			{
-				m_connection = std::make_unique<connection<T>>();
+				
 
 				asio::ip::tcp::resolver resolver(m_context);
 				asio::ip::tcp::resolver::results_type m_endpoints = resolver.resolve(host, std::to_string(port));
+
+				// create connection
+				m_connection = std::make_unique<connection<T>>(connection<T>::owner::client, m_context, asio::ip::tcp::socket(m_context), m_qMessagesIn);
 
 				//connect to server
 				m_connection->ConnectToServer(m_endpoints);
@@ -63,6 +69,14 @@ namespace net
 				return m_connection->IsConnected();
 			else
 				return false;
+		}
+	public:
+		void Send(const message<T>& msg)
+		{
+			if (IsConnected())
+			{
+				m_connection->Send(msg);
+			}
 		}
 
 		tsqueued<owned_message<T>>& Incoming()
