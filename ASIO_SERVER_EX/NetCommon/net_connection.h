@@ -4,8 +4,13 @@
 #include "net_tsqeued.h"
 #include "net_message.h"
 
+
 namespace net
 {
+	
+	template<typename T>
+	class server_interface;
+	
 	template<typename T>
 	class connection : public std::enable_shared_from_this<connection<T>> // shared_ptr*this
 	{
@@ -21,6 +26,23 @@ namespace net
 		: m_asioContext(asioContext), m_socket(std::move(socket)), m_qMessagesIn(qIn)
 		{
 			m_nOwnerType = parent;
+
+			// validation check
+			if (m_nOwnerType == owner::server)
+			{
+				// construct some data for client and then send back for validation
+				m_nHandshakeOut = uint64_t(std::chrono::system_clock::now().time_since_epoch().count());
+
+				// scrambled version for checking 
+				m_nHandshakeCheck = scramble(m_nHandshakeOut);
+			}
+			else
+			{
+				// for client -> server, we we have nothing to define
+				m_nHandshakeIn = 0;
+				m_nHandshakeOut = 0;
+			}
+
 		} 
 		virtual ~connection() {}
 		
@@ -29,7 +51,7 @@ namespace net
 			return id;
 		}
 		// only for servers
-		void ConnectToServer(const asio::ip::tcp::resolver::results_type& endpoints) 
+		void ConnectToServer(net::server_interface<T>* server, const asio::ip::tcp::resolver::results_type& endpoints)
 		{
 			if (m_nOwnerType == owner::client)
 			{
@@ -39,20 +61,32 @@ namespace net
 					{
 						if (!ec)
 						{
-							ReadHeader();
+							//ReadHeader();
+
+							// validate the data first
+							WriteValidation();
+							
+							// whait for correct respond
+							ReadValidation(server);
+
+
 						}
 					});
 			}
 		} 
 
-		void ConnectToClient(uint32_t uid = 0)
+		void ConnectToClient(net::server_interface<T>* server, uint32_t uid = 0)
 		{
 			if (m_nOwnerType == owner::server)
 			{
 				if (m_socket.is_open())
 				{
 					id = uid;
-					ReadHeader();
+
+					//ReadHeader();
+					WriteValidation();
+
+					ReadValidation(server);
 				}
 			}
 		}
@@ -233,6 +267,78 @@ namespace net
 			ReadHeader();
 		}
 
+		// "Encrypt data"
+		uint64_t scramble(uint64_t nInput)
+		{
+			// put some encription key
+			uint64_t nOutput = nInput ^ 0xDEADBEEFC0DECAFE;
+			nOutput = (nOutput & 0xF0F0F0F0F0F0F0) >> 4 | (nOutput & 0xF0F0F0F0F0F0F0) << 4;
+			return nOutput ^ 0xC0DEFACE12345678;
+		}
+
+		void WriteValidation()
+		{
+			asio::async_write(m_socket, asio::buffer(&m_nHandshakeOut, sizeof(uint64_t)),
+				[this](std::error_code ec, std::size_t length)
+				{
+					if (!ec)
+					{
+						// validation data sent
+						if (m_nOwnerType == owner::client)
+						{
+							ReadHeader();
+						}
+					}
+					else
+					{
+						
+						std::cout << "[" << id << "] Validation Fail.\n";
+						m_socket.close();
+					}
+				});
+		}
+
+		
+			
+		void ReadValidation(net::server_interface<T>* server = nullptr)
+		{
+			asio::async_read(m_socket, asio::buffer(&m_nHandshakeIn, sizeof(uint64_t)),
+				[this](std::error_code ec, std::size_t length)
+				{
+					if (!ec)
+					{
+						// validation data read
+						if (m_nOwnerType == owner::server)
+						{
+							if (m_nHandshakeIn == m_nHandshakeCheck)
+							{
+								std::cout << " Client Validated.\n";
+								//server->OnClientValidated(this->shared_from_this()); // server ERROR
+
+								ReadHeader();
+							}
+						}
+						else
+						{
+							// connection is a client check the "puzzle"
+							m_nHandshakeOut = scramble(m_nHandshakeIn);
+							WriteValidation();
+						}
+					}
+					else
+					{
+						
+						std::cout << " Client Disconnected (ReadValidation).\n";
+						m_socket.close();
+					}
+				});
+		
+		}
+
+		
+
+
+
 	protected:
 
 		//unique connection
@@ -250,6 +356,10 @@ namespace net
 
 		uint32_t id = 0;
 
+		// handshake Validation
+		uint64_t m_nHandshakeOut = 0;
+		uint64_t m_nHandshakeIn  = 0;
+		uint64_t m_nHandshakeCheck    = 0;
 	};
 
 }

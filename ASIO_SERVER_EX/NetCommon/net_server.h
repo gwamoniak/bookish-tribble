@@ -68,7 +68,7 @@ namespace net
 					{
 						// add  new connection
 						m_deqConnections.push_back(std::move(conn));
-						m_deqConnections.back()->ConnectToClient(nIDCounter++);
+						m_deqConnections.back()->ConnectToClient(this,nIDCounter++);
 
 						std::cout << "<-------> :ID=" << m_deqConnections.back()->GetID() << " Connection approved\n";
 					}
@@ -170,11 +170,17 @@ namespace net
 
 		virtual void onClientDisconnected(std::shared_ptr<connection<T>> client)
 		{
-			return false;
+			//return false;
 		}
 		virtual void OnMessage(std::shared_ptr<connection<T>> client, message<T>& msg)
 		{
 
+		}
+
+	public:
+		virtual void OnClientValidated(std::shared_ptr<connection<T>> client)
+		{
+			
 		}
 
 	protected:

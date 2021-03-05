@@ -49,7 +49,7 @@ namespace net
 				m_connection = std::make_unique<connection<T>>(connection<T>::owner::client, m_context, asio::ip::tcp::socket(m_context), m_qMessagesIn);
 
 				//connect to server
-				m_connection->ConnectToServer(m_endpoints);
+				m_connection->ConnectToServer(this,m_endpoints);
 
 				//Start Context Thread
 				threadContext = std::thread([this]() {m_context.run(); });
