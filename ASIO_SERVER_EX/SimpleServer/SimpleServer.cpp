@@ -31,7 +31,7 @@ protected:
 		return true;
 	}
 
-	// Called when a client appears to have disconnected
+	// Called when a client appears to be disconnected
 	virtual void OnClientDisconnect(std::shared_ptr<net::connection<CustomMsgTypes>> client)
 	{
 		std::cout << "Removing client [" << client->GetID() << "]\n";
